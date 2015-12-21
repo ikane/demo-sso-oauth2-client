@@ -2,7 +2,6 @@ package org.ikane;
 
 import java.io.IOException;
 import java.security.Principal;
-import java.util.ArrayList;
 import java.util.Arrays;
 
 import javax.servlet.Filter;
