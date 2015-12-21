@@ -1,0 +1,30 @@
+debug: true
+server:
+  #context-path: /demo-sso-oauth2-client
+  #port: 9898
+  
+logging:
+  level:
+    org.springframework.security: DEBUG
+
+# The OAuth2 server definition that would be used to send the authorization requests to
+authserver:
+    hostname: localhost
+    port: 9999
+    contextPath: uaa
+    
+security:
+  oauth2:
+    #loginPath: /login
+    client:
+      clientId: acme
+      clientSecret: acmesecret
+      accessTokenUri: http://${authserver.hostname}:${authserver.port}/${authserver.contextPath}/oauth/token
+      userAuthorizationUri: http://${authserver.hostname}:${authserver.port}/${authserver.contextPath}/oauth/authorize    
+    resource:
+      userInfoUri: http://${authserver.hostname}:${authserver.port}/${authserver.contextPath}/user
+#      preferTokenInfo: false
+
+      
+security.basic.enabled: false
+spring.thymeleaf.cache: false
