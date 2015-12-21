@@ -2,6 +2,7 @@ package org.ikane;
 
 import java.io.IOException;
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import javax.servlet.Filter;
@@ -18,13 +19,17 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.security.oauth2.client.EnableOAuth2Sso;
+import org.springframework.boot.autoconfigure.security.oauth2.resource.UserInfoRestTemplateCustomizer;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.web.csrf.CsrfFilter;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.security.web.csrf.CsrfTokenRepository;
@@ -47,9 +52,11 @@ public class DemoSsoOauth2ClientApplication implements CommandLineRunner {
 		SecurityContext securityContext = SecurityContextHolder.getContext();
 		try {
 			Authentication authentication = securityContext.getAuthentication();
-			logger.info(authentication.getDetails().toString());
+			if(authentication != null) {
+				logger.info(authentication.getDetails().toString());
 			
-			SecurityContextHolder.clearContext();
+				SecurityContextHolder.clearContext();
+			}
 		} catch (Exception e) {
 			logger.error("Error", e);
 		}
@@ -66,6 +73,11 @@ public class DemoSsoOauth2ClientApplication implements CommandLineRunner {
     
     @RequestMapping(value="/")
     public String home() {
+    	return "index";
+    }
+    
+    @RequestMapping(value="/index")
+    public String index() {
     	return "index";
     }
     
@@ -89,10 +101,18 @@ public class DemoSsoOauth2ClientApplication implements CommandLineRunner {
     	
     	@Override
     	public void configure(HttpSecurity http) throws Exception {
-    		http.antMatcher("/**").authorizeRequests()
-    				.antMatchers("/index.html", "/").permitAll().anyRequest()
-    				.authenticated().and().csrf().csrfTokenRepository(csrfTokenRepository())
-    				.and().addFilterAfter(csrfHeaderFilter(), CsrfFilter.class);
+    		http
+		            .formLogin()
+		            .loginPage("/login")
+		            .defaultSuccessUrl("/index")
+		        .and()
+		            .logout().logoutSuccessUrl("/index")
+		        .and()
+		            .authorizeRequests().antMatchers("/login").permitAll()
+		                                .antMatchers("/**").authenticated();
+    		
+    		http.csrf().csrfTokenRepository(csrfTokenRepository());
+    		http.addFilterAfter(csrfHeaderFilter(), CsrfFilter.class);
     	}
     	
     	private Filter csrfHeaderFilter() {
@@ -132,7 +152,5 @@ public class DemoSsoOauth2ClientApplication implements CommandLineRunner {
     		repository.setHeaderName(CSRF_ANGULAR_HEADER_NAME);
     		return repository;
     	}
-    	
     }
-    
 }
