@@ -1,8 +1,10 @@
-debug: true
+debug: false
   
 logging: 
   level:
     org.springframework.security: DEBUG
+    org.ikane: DEBUG
+  file: oauth-client.log
 
 security:
   ignored: /favicon.ico,/js/**,/css/**

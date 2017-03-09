@@ -42,26 +42,11 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.WebUtils;
 
 @SpringBootApplication
-@Controller
-public class DemoSsoOauth2ClientApplication implements CommandLineRunner {
+public class DemoSsoOauth2ClientApplication {
 
 	private static final Logger logger = LoggerFactory.getLogger(DemoSsoOauth2ClientApplication.class);
 	
-	@Override
-	public void run(String... arg0) throws Exception {
-		SecurityContext securityContext = SecurityContextHolder.getContext();
-		try {
-			Authentication authentication = securityContext.getAuthentication();
-			if(authentication != null) {
-				logger.info(authentication.getDetails().toString());
-			
-				SecurityContextHolder.clearContext();
-			}
-		} catch (Exception e) {
-			logger.error("Error", e);
-		}
-	}
-	
+		
     public static void main(String[] args) {
         ConfigurableApplicationContext applicationContext = SpringApplication.run(DemoSsoOauth2ClientApplication.class, args);
         ConfigurableEnvironment env = applicationContext.getEnvironment();
@@ -70,87 +55,5 @@ public class DemoSsoOauth2ClientApplication implements CommandLineRunner {
 				StringUtils.defaultIfEmpty(env.getProperty("server.contextPath"), "/"),
 				Arrays.toString(env.getActiveProfiles()));
     }
-    
-    @RequestMapping(value="/")
-    public String home() {
-    	return "index";
-    }
-    
-    @RequestMapping(value="/index")
-    public String index() {
-    	return "index";
-    }
-    
-    @RequestMapping(value="/user")
-    @ResponseBody
-	public Principal user(Principal user) {
-		return user;
-	}
-    
-    /**
-     * The Class OAuthConfiguration that sets up the OAuth2 single sign on
-     * configuration and the web security associated with it.
-     */
-    @Component
-    @Controller
-    @EnableOAuth2Sso
-    protected static class OAuthClientConfiguration extends WebSecurityConfigurerAdapter {
-    	
-    	private static final String CSRF_COOKIE_NAME = "XSRF-TOKEN";
-    	private static final String CSRF_ANGULAR_HEADER_NAME = "X-XSRF-TOKEN";
-    	
-    	@Override
-    	public void configure(HttpSecurity http) throws Exception {
-    		http
-		            .formLogin()
-		            .loginPage("/login")
-		            .defaultSuccessUrl("/index")
-		        .and()
-		            .logout().logoutSuccessUrl("/index")
-		        .and()
-		            .authorizeRequests().antMatchers("/login").permitAll()
-		                                .antMatchers("/**").authenticated();
-    		
-    		http.csrf().csrfTokenRepository(csrfTokenRepository());
-    		http.addFilterAfter(csrfHeaderFilter(), CsrfFilter.class);
-    	}
-    	
-    	private Filter csrfHeaderFilter() {
-    		return new OncePerRequestFilter() {
-    			
-    			@Override
-    			protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-    					throws ServletException, IOException {
-    				CsrfToken csrf = (CsrfToken) request.getAttribute(CsrfToken.class.getName());
-    				if (csrf != null) {
-    					Cookie cookie = WebUtils.getCookie(request, CSRF_COOKIE_NAME);
-    					String token = csrf.getToken();
-    					if (cookie == null || token != null
-    							&& !token.equals(cookie.getValue())) {
-    						cookie = new Cookie(CSRF_COOKIE_NAME, token);
-    						cookie.setPath("/");
-    						response.addCookie(cookie);
-    					}
-    				}
-    				filterChain.doFilter(request, response);
-    			}
-    		};
-    	}
-    	
-    	/**
-    	 * Angular sends the CSRF token in a custom header named "X-XSRF-TOKEN"
-    	 * rather than the default "X-CSRF-TOKEN" that Spring security expects.
-    	 * Hence we are now telling Spring security to expect the token in the
-    	 * "X-XSRF-TOKEN" header.<br><br>
-    	 * 
-    	 * This customization is added to the <code>csrf()</code> filter.
-    	 * 
-    	 * @return
-    	 */
-    	private CsrfTokenRepository csrfTokenRepository() {
-    		HttpSessionCsrfTokenRepository repository = new HttpSessionCsrfTokenRepository();
-    		repository.setHeaderName(CSRF_ANGULAR_HEADER_NAME);
-    		return repository;
-    	}
-    }
+       
 }
