@@ -1,0 +1,21 @@
+{
+  "name": "demo-sso-oauth2-client",
+  "homepage": "https://github.com/ikane/demo-sso-oauth2-client",
+  "authors": [
+    "IKANE <kaneelhadji2610@yahoo.fr>"
+  ],
+  "description": "",
+  "main": "",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular": "angularjs#^1.6.3",
+    "jquery": "^3.2.1"
+  }
+}

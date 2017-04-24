@@ -17,8 +17,11 @@ security:
     resource:
       userInfoUri: http://localhost:9999/uaa/user
 
-      
-security.basic.enabled: false
+
+  user:
+    password: 1234
+
+#security.basic.enabled: false
 spring.thymeleaf.cache: false
 
 spring.datasource.url: jdbc:mysql://localhost/test
