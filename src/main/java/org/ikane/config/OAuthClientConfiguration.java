@@ -1,6 +1,8 @@
 package org.ikane.config;
 
 import org.springframework.boot.autoconfigure.security.oauth2.client.EnableOAuth2Sso;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
@@ -41,4 +43,12 @@ public class OAuthClientConfiguration extends WebSecurityConfigurerAdapter {
 			.formLogin().and()
 			.httpBasic();
 	}
+	
+	@Override
+	 protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+	        auth.inMemoryAuthentication()
+	        	.withUser("user").password("1234").roles("USER").and()
+	            .withUser("admin").password("1234").roles("USER", "ADMIN");
+	 }
+	
 }
